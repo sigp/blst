@@ -462,6 +462,12 @@ macro_rules! sig_variant_impl {
             }
         }
 
+        // Trait for equality comparisons which are equivalence relations.
+        //
+        // This means, that in addition to a == b and a != b being strict inverses, the equality
+        // must be (for all a, b and c).
+        impl Eq for PublicKey {}
+
         impl PartialEq for PublicKey {
             fn eq(&self, other: &Self) -> bool {
                 unsafe { $pk_eq(&self.point, &other.point) }
@@ -898,6 +904,12 @@ macro_rules! sig_variant_impl {
                 self.compress()
             }
         }
+
+        // Trait for equality comparisons which are equivalence relations.
+        //
+        // This means, that in addition to a == b and a != b being strict inverses, the equality
+        // must be (for all a, b and c).
+        impl Eq for Signature {}
 
         impl PartialEq for Signature {
             fn eq(&self, other: &Self) -> bool {
