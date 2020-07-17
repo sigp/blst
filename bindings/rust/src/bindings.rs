@@ -181,28 +181,28 @@ fn bindgen_test_layout_blst_fp12() {
     );
 }
 extern "C" {
-    pub fn blst_scalar_from_uint32(ret: *mut blst_scalar, a: *const u32);
+    pub fn blst_scalar_from_uint32(out: *mut blst_scalar, a: *const u32);
 }
 extern "C" {
-    pub fn blst_uint32_from_scalar(ret: *mut u32, a: *const blst_scalar);
+    pub fn blst_uint32_from_scalar(out: *mut u32, a: *const blst_scalar);
 }
 extern "C" {
-    pub fn blst_scalar_from_uint64(ret: *mut blst_scalar, a: *const u64);
+    pub fn blst_scalar_from_uint64(out: *mut blst_scalar, a: *const u64);
 }
 extern "C" {
-    pub fn blst_uint64_from_scalar(ret: *mut u64, a: *const blst_scalar);
+    pub fn blst_uint64_from_scalar(out: *mut u64, a: *const blst_scalar);
 }
 extern "C" {
-    pub fn blst_scalar_from_bendian(ret: *mut blst_scalar, a: *const byte);
+    pub fn blst_scalar_from_bendian(out: *mut blst_scalar, a: *const byte);
 }
 extern "C" {
-    pub fn blst_bendian_from_scalar(ret: *mut byte, a: *const blst_scalar);
+    pub fn blst_bendian_from_scalar(out: *mut byte, a: *const blst_scalar);
 }
 extern "C" {
-    pub fn blst_scalar_from_lendian(ret: *mut blst_scalar, a: *const byte);
+    pub fn blst_scalar_from_lendian(out: *mut blst_scalar, a: *const byte);
 }
 extern "C" {
-    pub fn blst_lendian_from_scalar(ret: *mut byte, a: *const blst_scalar);
+    pub fn blst_lendian_from_scalar(out: *mut byte, a: *const blst_scalar);
 }
 extern "C" {
     pub fn blst_scalar_fr_check(a: *const blst_scalar) -> bool;
@@ -458,7 +458,7 @@ extern "C" {
     pub fn blst_p1_double(out: *mut blst_p1, a: *const blst_p1);
 }
 extern "C" {
-    pub fn blst_p1_mult_w5(
+    pub fn blst_p1_mult(
         out: *mut blst_p1,
         p: *const blst_p1,
         scalar: *const blst_scalar,
@@ -592,7 +592,7 @@ extern "C" {
     pub fn blst_p2_double(out: *mut blst_p2, a: *const blst_p2);
 }
 extern "C" {
-    pub fn blst_p2_mult_w5(
+    pub fn blst_p2_mult(
         out: *mut blst_p2,
         p: *const blst_p2,
         scalar: *const blst_scalar,

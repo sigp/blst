@@ -24,7 +24,7 @@ script:
               rustup set default-host x86_64-pc-windows-msvc;
               export ML=-nologo;
           fi;
-          (cd bindings/rust; cargo test)
+          (cd bindings/rust; cargo test --release)
       fi
     - if which go > /dev/null 2>&1; then
           (cd bindings/go; go test -test.v)
@@ -45,15 +45,17 @@ notifications:
     email: false
 
 before_cache:
-    - rm -rf "$TRAVIS_HOME/.cargo/registry/src"
     - if [ "x$TRAVIS_LANGUAGE" = "xrust" ]; then
-          (cd bindings/rust; cargo clean -p blst;
-           rm -rf target/debug/incremental;
-           rm -rf target/debug/deps/blst-*;
-           rm -rf target/debug/build/blst-*;
-           rm -rf target/debug/build/src;
-           rm -rf target/debug/build/build)
+          (cd bindings/rust;
+           cargo clean -p blst; cargo clean -p blst --release;
+           rm -rf target/.rustc_info.json;
+           rm -rf target/{debug,release}/*/blst-*;
+           rm -rf target/{debug,release}/incremental;
+           rm -rf target/{debug,release}/build/src;
+           rm -rf target/{debug,release}/build/build)
       fi
+    - (cd "$TRAVIS_HOME"; rm -rf .cargo/registry/src)
+    - (cd "$TRAVIS_HOME"; rm -rf .cargo/registry/index/*/.cache)
 
 cache:
     cargo: true
