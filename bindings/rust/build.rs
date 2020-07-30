@@ -66,8 +66,12 @@ fn main() {
     // Optimization level depends on whether or not --release is passed
     // or implied.
     let mut cc = cc::Build::new();
-    cc.flag_if_supported("-march=native")
-        .flag_if_supported("-mno-avx") // avoid costly transitions
+
+    if !cfg!(feature = "portable") {
+        println!("Build optimized for host CPU using -march=native");
+        cc.flag_if_supported("-march=native");
+    }
+    cc.flag_if_supported("-mno-avx") // avoid costly transitions
         .flag_if_supported("-Wno-unused-command-line-argument");
     if !cfg!(debug_assertions) {
         cc.opt_level(2);
