@@ -86,24 +86,24 @@ func KeyGen(ikm []byte, optional ...[]byte) *SecretKey {
 //
 // Pairing
 //
-func PairingCtx() Pairing {
+func PairingCtx(hash_or_encode bool, DST []byte) Pairing {
 	ctx := make([]uint64, C.blst_pairing_sizeof()/8)
-	C.blst_pairing_init((*C.blst_pairing)(&ctx[0]))
+	var uDST *C.byte
+	if DST != nil {
+		uDST = (*C.byte)(&DST[0])
+	}
+	C.blst_pairing_init((*C.blst_pairing)(&ctx[0]), C.bool(hash_or_encode),
+		uDST, C.size_t(len(DST)))
 	return ctx
 }
 
 func PairingAggregatePkInG1(ctx Pairing, PK *P1Affine, sig *P2Affine,
-	hash_or_encode bool, msg []byte, optional ...[]byte) int {
-	var DST []byte
-	var uDST *C.byte
-	if len(optional) > 0 {
-		DST = optional[0]
-		uDST = (*C.byte)(&DST[0])
-	}
+	msg []byte,
+	optional ...[]byte) int { // aug
 	var aug []byte
 	var uaug *C.byte
-	if len(optional) > 1 {
-		aug = optional[1]
+	if len(optional) > 0 {
+		aug = optional[0]
 		if aug != nil {
 			uaug = (*C.byte)(&aug[0])
 		}
@@ -113,91 +113,82 @@ func PairingAggregatePkInG1(ctx Pairing, PK *P1Affine, sig *P2Affine,
 		umsg = (*C.byte)(&msg[0])
 	}
 
-	r := C.blst_pairing_aggregate_pk_in_g1((*C.blst_pairing)(&ctx[0]),
-		PK, sig, C.bool(hash_or_encode),
+	r := C.blst_pairing_aggregate_pk_in_g1((*C.blst_pairing)(&ctx[0]), PK, sig,
 		umsg, C.size_t(len(msg)),
-		uDST, C.size_t(len(DST)),
 		uaug, C.size_t(len(aug)))
 
 	return int(r)
 }
 
 func PairingAggregatePkInG2(ctx Pairing, PK *P2Affine, sig *P1Affine,
-	hash_or_encode bool, msg []byte, optional ...[]byte) int {
-	var DST []byte
-	var uDST *C.byte
-	if len(optional) > 0 {
-		DST = optional[0]
-		uDST = (*C.byte)(&DST[0])
-	}
+	msg []byte,
+	optional ...[]byte) int { // aug
 	var aug []byte
 	var uaug *C.byte
-	if len(optional) > 1 {
-		aug = optional[1]
+	if len(optional) > 0 {
+		aug = optional[0]
 		if aug != nil {
 			uaug = (*C.byte)(&aug[0])
 		}
 	}
+	var umsg *C.byte
+	if msg != nil {
+		umsg = (*C.byte)(&msg[0])
+	}
 
-	r := C.blst_pairing_aggregate_pk_in_g2((*C.blst_pairing)(&ctx[0]),
-		PK, sig, C.bool(hash_or_encode),
-		(*C.byte)(&msg[0]), C.size_t(len(msg)),
-		uDST, C.size_t(len(DST)),
+	r := C.blst_pairing_aggregate_pk_in_g2((*C.blst_pairing)(&ctx[0]), PK, sig,
+		umsg, C.size_t(len(msg)),
 		uaug, C.size_t(len(aug)))
 
 	return int(r)
 }
 
 func PairingMulNAggregatePkInG1(ctx Pairing, PK *P1Affine, sig *P2Affine,
-	rand *Scalar, randBits int, useHash bool, msg []byte,
-	optional ...[]byte) int {
-
-	var dst []byte
-	if len(optional) > 0 {
-		dst = optional[0]
-	}
-
+	rand *Scalar, randBits int, msg []byte,
+	optional ...[]byte) int { // aug
 	var aug []byte
-	if len(optional) > 1 {
-		aug = optional[1]
+	var uaug *C.byte
+	if len(optional) > 0 {
+		aug = optional[0]
+		if aug != nil {
+			uaug = (*C.byte)(&aug[0])
+		}
 	}
-
-	var hash *P2Affine
-	if useHash {
-		hash = HashToG2(msg, dst, aug).ToAffine()
-	} else {
-		hash = EncodeToG2(msg, dst, aug).ToAffine()
+	var umsg *C.byte
+	if msg != nil {
+		umsg = (*C.byte)(&msg[0])
 	}
 
 	r := C.blst_pairing_mul_n_aggregate_pk_in_g1((*C.blst_pairing)(&ctx[0]),
-		PK, sig, hash, &rand.l[0], C.size_t(randBits))
+		PK, sig,
+		&rand.l[0], C.size_t(randBits),
+		umsg, C.size_t(len(msg)),
+		uaug, C.size_t(len(aug)))
 
 	return int(r)
 }
 
 func PairingMulNAggregatePkInG2(ctx Pairing, PK *P2Affine, sig *P1Affine,
-	rand *Scalar, randBits int, useHash bool, msg []byte,
-	optional ...[]byte) int {
-
-	var dst []byte
-	if len(optional) > 0 {
-		dst = optional[0]
-	}
-
+	rand *Scalar, randBits int, msg []byte,
+	optional ...[]byte) int { // aug
 	var aug []byte
-	if len(optional) > 1 {
-		aug = optional[1]
+	var uaug *C.byte
+	if len(optional) > 0 {
+		aug = optional[0]
+		if aug != nil {
+			uaug = (*C.byte)(&aug[0])
+		}
 	}
-
-	var hash *P1Affine
-	if useHash {
-		hash = HashToG1(msg, dst, aug).ToAffine()
-	} else {
-		hash = EncodeToG1(msg, dst, aug).ToAffine()
+	var umsg *C.byte
+	if msg != nil {
+		umsg = (*C.byte)(&msg[0])
 	}
 
 	r := C.blst_pairing_mul_n_aggregate_pk_in_g2((*C.blst_pairing)(&ctx[0]),
-		PK, sig, hash, &rand.l[0], C.size_t(randBits))
+		PK, sig,
+		&rand.l[0], C.size_t(randBits),
+		umsg, C.size_t(len(msg)),
+		uaug, C.size_t(len(aug)))
 
 	return int(r)
 }
@@ -425,7 +416,7 @@ func coreAggregateVerifyPkInG1(sigFn sigGetterP2, pkFn pkGetterP1,
 	mutex.Lock()
 	for tid := 0; tid < numThreads; tid++ {
 		go func() {
-			pairing := PairingCtx()
+			pairing := PairingCtx(useHash, dst)
 			var temp P1Affine
 			for atomic.LoadInt32(&valid) > 0 {
 				// Get a work item
@@ -449,8 +440,7 @@ func coreAggregateVerifyPkInG1(sigFn sigGetterP2, pkFn pkGetterP1,
 				}
 
 				// Pairing and accumulate
-				PairingAggregatePkInG1(pairing, curPk, nil,
-					useHash, msgs[work], dst, aug)
+				PairingAggregatePkInG1(pairing, curPk, nil, msgs[work], aug)
 
 				// application might have some async work to do
 				runtime.Gosched()
@@ -574,7 +564,7 @@ func multipleAggregateVerifyPkInG1(paramsFn mulAggGetterPkInG1, msgs []Message,
 
 	for tid := 0; tid < numThreads; tid++ {
 		go func() {
-			pairing := PairingCtx()
+			pairing := PairingCtx(useHash, dst)
 			var tempRand Scalar
 			var tempPk P1Affine
 			var tempSig P2Affine
@@ -589,7 +579,7 @@ func multipleAggregateVerifyPkInG1(paramsFn mulAggGetterPkInG1, msgs []Message,
 					&tempPk, &tempRand)
 
 				if PairingMulNAggregatePkInG1(pairing, curPk, curSig,
-					curRand, randBits, useHash, msgs[work], dst, aug) !=
+					curRand, randBits, msgs[work], aug) !=
 					C.BLST_SUCCESS {
 					atomic.StoreInt32(&valid, 0)
 					break
@@ -990,7 +980,7 @@ func coreAggregateVerifyPkInG2(sigFn sigGetterP1, pkFn pkGetterP2,
 	mutex.Lock()
 	for tid := 0; tid < numThreads; tid++ {
 		go func() {
-			pairing := PairingCtx()
+			pairing := PairingCtx(useHash, dst)
 			var temp P2Affine
 			for atomic.LoadInt32(&valid) > 0 {
 				// Get a work item
@@ -1014,8 +1004,7 @@ func coreAggregateVerifyPkInG2(sigFn sigGetterP1, pkFn pkGetterP2,
 				}
 
 				// Pairing and accumulate
-				PairingAggregatePkInG2(pairing, curPk, nil,
-					useHash, msgs[work], dst, aug)
+				PairingAggregatePkInG2(pairing, curPk, nil, msgs[work], aug)
 
 				// application might have some async work to do
 				runtime.Gosched()
@@ -1139,7 +1128,7 @@ func multipleAggregateVerifyPkInG2(paramsFn mulAggGetterPkInG2, msgs []Message,
 
 	for tid := 0; tid < numThreads; tid++ {
 		go func() {
-			pairing := PairingCtx()
+			pairing := PairingCtx(useHash, dst)
 			var tempRand Scalar
 			var tempPk P2Affine
 			var tempSig P1Affine
@@ -1154,7 +1143,7 @@ func multipleAggregateVerifyPkInG2(paramsFn mulAggGetterPkInG2, msgs []Message,
 					&tempPk, &tempRand)
 
 				if PairingMulNAggregatePkInG2(pairing, curPk, curSig,
-					curRand, randBits, useHash, msgs[work], dst, aug) !=
+					curRand, randBits, msgs[work], aug) !=
 					C.BLST_SUCCESS {
 					atomic.StoreInt32(&valid, 0)
 					break
@@ -1410,6 +1399,10 @@ func (p1 *P1Affine) Uncompress(in []byte) *P1Affine {
 	return p1
 }
 
+func (p1 *P1Affine) InG1() bool {
+	return bool(C.blst_p1_affine_in_g1(p1))
+}
+
 func (dummy *P1Affine) BatchUncompress(in [][]byte) []*P1Affine {
 	// Allocate space for all of the resulting points. Later we'll save pointers
 	// and return those so that the result could be used in other functions,
@@ -1612,6 +1605,10 @@ func (p2 *P2Affine) Uncompress(in []byte) *P2Affine {
 	return p2
 }
 
+func (p2 *P2Affine) InG2() bool {
+	return bool(C.blst_p2_affine_in_g2(p2))
+}
+
 func (dummy *P2Affine) BatchUncompress(in [][]byte) []*P2Affine {
 	// Allocate space for all of the resulting points. Later we'll save pointers
 	// and return those so that the result could be used in other functions,
@@ -1803,6 +1800,10 @@ func (s *Scalar) Deserialize(in []byte) *Scalar {
 		return nil
 	}
 	return s
+}
+
+func (s *Scalar) Valid() bool {
+	return bool(C.blst_scalar_fr_check(s))
 }
 
 //
