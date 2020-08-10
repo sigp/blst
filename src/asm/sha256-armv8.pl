@@ -339,10 +339,10 @@ sub body_00_15 () {
 }
 
 $code.=<<___;
-.globl	sha256_block_data_order
-.type	sha256_block_data_order,%function
+.globl	blst_sha256_block_data_order
+.type	blst_sha256_block_data_order,%function
 .align	4
-sha256_block_data_order:
+blst_sha256_block_data_order:
 	stp	x29, x30, [sp, #-16]!
 	mov	x29, sp
 	sub	sp,sp,#16*4
@@ -434,7 +434,7 @@ $code.=<<___;
 	ldr	x29,[x29]
 	add	sp,sp,#16*4+16
 	ret
-.size	sha256_block_data_order,.-sha256_block_data_order
+.size	blst_sha256_block_data_order,.-blst_sha256_block_data_order
 ___
 }
 

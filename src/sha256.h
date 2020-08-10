@@ -24,11 +24,11 @@ typedef struct {
 
 #if (defined(__x86_64__) || defined(__x86_64) || defined(_M_X64)) && \
      defined(__SHA__)   /* -msha */
-# define sha256_block_data_order sha256_block_data_order_shaext
+# define blst_sha256_block_data_order blst_sha256_block_data_order_shaext
 #elif defined(__aarch64__) && defined(__ARM_FEATURE_CRYPTO)
-# define sha256_block_data_order sha256_block_armv8
+# define blst_sha256_block_data_order sha256_block_armv8
 #endif
-void sha256_block_data_order(unsigned int *h, const void *inp, size_t blocks);
+void blst_sha256_block_data_order(unsigned int *h, const void *inp, size_t blocks);
 
 static void sha256_init_h(unsigned int h[8])
 {
@@ -68,7 +68,7 @@ static void sha256_update(SHA256_CTX *ctx, const void *_inp, size_t len)
             sha256_bcopy(ctx->buf + n, inp, rem);
             inp += rem;
             len -= rem;
-            sha256_block_data_order(ctx->h, ctx->buf, 1);
+            blst_sha256_block_data_order(ctx->h, ctx->buf, 1);
             vec_zero(ctx->buf, sizeof(ctx->buf));
             ctx->off = 0;
         }
@@ -76,7 +76,7 @@ static void sha256_update(SHA256_CTX *ctx, const void *_inp, size_t len)
 
     n = len / sizeof(ctx->buf);
     if (n > 0) {
-        sha256_block_data_order(ctx->h, inp, n);
+        blst_sha256_block_data_order(ctx->h, inp, n);
         n *= sizeof(ctx->buf);
         inp += n;
         len -= n;
@@ -118,14 +118,14 @@ static void sha256_final(unsigned char md[32], SHA256_CTX *ctx)
     ctx->buf[n++] = 0x80;
 
     if (n > (sizeof(ctx->buf) - 8)) {
-        sha256_block_data_order(ctx->h, ctx->buf, 1);
+        blst_sha256_block_data_order(ctx->h, ctx->buf, 1);
         vec_zero(ctx->buf, sizeof(ctx->buf));
     }
 
     tail = ctx->buf + sizeof(ctx->buf) - 8;
     __TOBE32(tail, (unsigned int)(bits >> 32));
     __TOBE32(tail + 4, (unsigned int)bits);
-    sha256_block_data_order(ctx->h, ctx->buf, 1);
+    blst_sha256_block_data_order(ctx->h, ctx->buf, 1);
     sha256_emit(md, ctx->h);
 }
 

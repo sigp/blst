@@ -47,7 +47,7 @@ static void HMAC_init(HMAC_SHA256_CTX *ctx, const void *K, size_t K_len)
         ctx->tail.l[i] ^= (limb_t)(0x3636363636363636 ^ 0x5c5c5c5c5c5c5c5c);
 
     sha256_init_h(ctx->h_opad);
-    sha256_block_data_order(ctx->h_opad, ctx->tail.c, 1);
+    blst_sha256_block_data_order(ctx->h_opad, ctx->tail.c, 1);
 
     vec_zero(ctx->tail.c, sizeof(ctx->tail));
     ctx->tail.c[32] = 0x80;
@@ -63,7 +63,7 @@ static void HMAC_final(unsigned char md[32], HMAC_SHA256_CTX *ctx)
 {
     sha256_final(ctx->tail.c, &ctx->ctx);
     sha256_hcopy(ctx->ctx.h, ctx->h_opad);
-    sha256_block_data_order(ctx->ctx.h, ctx->tail.c, 1);
+    blst_sha256_block_data_order(ctx->ctx.h, ctx->tail.c, 1);
     sha256_emit(md, ctx->ctx.h);
 }
 

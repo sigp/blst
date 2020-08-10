@@ -38,7 +38,7 @@ die "can't locate x86_64-xlate.pl";
 open STDOUT,"| \"$^X\" \"$xlate\" $flavour \"$output\""
     or die "can't call $xlate: $!";
 
-$func="sha256_block_data_order";
+$func="blst_sha256_block_data_order";
 $TABLE="K256";
 $SZ=4;
 @ROT=($A,$B,$C,$D,$E,$F,$G,$H)=("%eax","%ebx","%ecx","%edx",
@@ -101,11 +101,11 @@ my ($Wi,$ABEF,$CDGH,$TMP,$BSWAP,$ABEF_SAVE,$CDGH_SAVE)=map("%xmm$_",(0..2,7..10)
 my @MSG=map("%xmm$_",(3..6));
 
 $code.=<<___;
-.globl	sha256_block_data_order_shaext
-.hidden	sha256_block_data_order_shaext
-.type	sha256_block_data_order_shaext,\@function,3,"unwind"
+.globl	blst_sha256_block_data_order_shaext
+.hidden	blst_sha256_block_data_order_shaext
+.type	blst_sha256_block_data_order_shaext,\@function,3,"unwind"
 .align	64
-sha256_block_data_order_shaext:
+blst_sha256_block_data_order_shaext:
 .cfi_startproc
 ___
 $code.=<<___ if ($win64);
@@ -258,7 +258,7 @@ ___
 $code.=<<___;
 	ret
 .cfi_endproc
-.size	sha256_block_data_order_shaext,.-sha256_block_data_order_shaext
+.size	blst_sha256_block_data_order_shaext,.-blst_sha256_block_data_order_shaext
 ___
 }}}
 {{{

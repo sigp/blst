@@ -181,9 +181,9 @@
 	ret
 	ENDP
 
-	EXPORT	|sha256_block_data_order|[FUNC]
+	EXPORT	|blst_sha256_block_data_order|[FUNC]
 	ALIGN	16
-|sha256_block_data_order| PROC
+|blst_sha256_block_data_order| PROC
 	stp	x29, x30, [sp, #-16]!
 	mov	x29, sp
 	sub	sp,sp,#16*4

@@ -180,10 +180,10 @@ Loop_hw:
 	ldr	x29,[sp],#16
 	ret
 
-.globl	_sha256_block_data_order
+.globl	_blst_sha256_block_data_order
 
 .align	4
-_sha256_block_data_order:
+_blst_sha256_block_data_order:
 	stp	x29, x30, [sp, #-16]!
 	mov	x29, sp
 	sub	sp,sp,#16*4

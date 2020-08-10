@@ -182,12 +182,12 @@ sha256_block_armv8:
 	ldr	x29,[sp],#16
 	ret
 
-.globl	sha256_block_data_order
-.def	sha256_block_data_order;
+.globl	blst_sha256_block_data_order
+.def	blst_sha256_block_data_order;
 .type	32;
 .endef
 .p2align	4
-sha256_block_data_order:
+blst_sha256_block_data_order:
 	stp	x29, x30, [sp, #-16]!
 	mov	x29, sp
 	sub	sp,sp,#16*4
